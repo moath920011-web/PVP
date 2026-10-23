@@ -1,11 +1,26 @@
 -- ============================================
--- ⚡ Light Tower Ultimate Standalone Script
+-- ⚡ Light Tower Loader & Key System
 -- ============================================
-
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- تنظيف أي واجهات قديمة
+local successLoad, KeyAuthModule = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/moath920011-web/PVP/refs/heads/main/auth.lua"))()
+end)
+
+if not successLoad or not KeyAuthModule then
+    warn("Failed to load auth.lua")
+    return
+end
+
+-- البيانات الجديدة المطلوبة
+local KeyAuth = KeyAuthModule.new({
+    name = "Moath.9.20011",
+    ownerid = "DTr7H3vPPD",
+    secret = "959fb413bbb5086fb63ad24d9474e0e300da6db87fedc93084b9610ed44b250b",
+    version = "1.0"
+})
+
 if LocalPlayer.PlayerGui:FindFirstChild("KeySystemGui") then
     LocalPlayer.PlayerGui.KeySystemGui:Destroy()
 end
@@ -13,145 +28,85 @@ if LocalPlayer.PlayerGui:FindFirstChild("HermanosCustomGui") then
     LocalPlayer.PlayerGui.HermanosCustomGui:Destroy()
 end
 
--- واجهة إدخال الكي
-local KeyScreenGui = Instance.new("ScreenGui")
-KeyScreenGui.Name = "KeySystemGui"
-KeyScreenGui.ResetOnSpawn = false
-KeyScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "KeySystemGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-local KeyFrame = Instance.new("Frame")
-KeyFrame.Size = UDim2.new(0, 360, 0, 220)
-KeyFrame.Position = UDim2.new(0.5, -180, 0.5, -110)
-KeyFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
-KeyFrame.BorderSizePixel = 0
-KeyFrame.Active = true
-KeyFrame.Draggable = true
-KeyFrame.Parent = KeyScreenGui
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 320, 0, 180)
+Frame.Position = UDim2.new(0.5, -160, 0.5, -90)
+Frame.BackgroundColor3 = Color3.fromRGB(18, 18, 25)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = ScreenGui
 
-local KeyCorner = Instance.new("UICorner")
-KeyCorner.CornerRadius = UDim.new(0, 12)
-KeyCorner.Parent = KeyFrame
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = Frame
 
-local KeyStroke = Instance.new("UIStroke")
-KeyStroke.Color = Color3.fromRGB(0, 242, 254)
-KeyStroke.Thickness = 1.5
-KeyStroke.Transparency = 0.3
-KeyStroke.Parent = KeyFrame
-
-local TitleKey = Instance.new("TextLabel")
-TitleKey.Size = UDim2.new(1, 0, 0, 45)
-TitleKey.BackgroundTransparency = 1
-TitleKey.Text = "🔐 Light Tower - Key Authentication"
-TitleKey.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleKey.TextSize = 14
-TitleKey.Font = Enum.Font.GothamBold
-TitleKey.Parent = KeyFrame
-
-local KeyBox = Instance.new("TextBox")
-KeyBox.Size = UDim2.new(1, -40, 0, 40)
-KeyBox.Position = UDim2.new(0, 20, 0, 60)
-KeyBox.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-KeyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-KeyBox.PlaceholderText = "Paste your license key here..."
-KeyBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 140)
-KeyBox.TextSize = 13
-KeyBox.Font = Enum.Font.GothamMedium
-KeyBox.ClearTextOnFocus = false
-KeyBox.Parent = KeyFrame
+local TextBox = Instance.new("TextBox")
+TextBox.Size = UDim2.new(1, -30, 0, 38)
+TextBox.Position = UDim2.new(0, 15, 0, 45)
+TextBox.BackgroundColor3 = Color3.fromRGB(28, 28, 40)
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.PlaceholderText = "Enter License Key..."
+TextBox.PlaceholderColor3 = Color3.fromRGB(130, 130, 150)
+TextBox.TextSize = 13
+TextBox.Font = Enum.Font.GothamMedium
+TextBox.ClearTextOnFocus = false
+TextBox.Parent = Frame
 
 local BoxCorner = Instance.new("UICorner")
-BoxCorner.CornerRadius = UDim.new(0, 8)
-BoxCorner.Parent = KeyBox
+BoxCorner.CornerRadius = UDim.new(0, 6)
+BoxCorner.Parent = TextBox
 
-local SubmitBtn = Instance.new("TextButton")
-SubmitBtn.Size = UDim2.new(1, -40, 0, 38)
-SubmitBtn.Position = UDim2.new(0, 20, 0, 115)
-SubmitBtn.BackgroundColor3 = Color3.fromRGB(0, 242, 254)
-SubmitBtn.BackgroundTransparency = 0.3
-SubmitBtn.Text = "Verify Key"
-SubmitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SubmitBtn.TextSize = 13
-SubmitBtn.Font = Enum.Font.GothamBold
-SubmitBtn.Parent = KeyFrame
+local Button = Instance.new("TextButton")
+Button.Size = UDim2.new(1, -30, 0, 35)
+Button.Position = UDim2.new(0, 15, 0, 95)
+Button.BackgroundColor3 = Color3.fromRGB(0, 242, 254)
+Button.Text = "Verify Key"
+Button.TextColor3 = Color3.fromRGB(15, 15, 25)
+Button.TextSize = 13
+Button.Font = Enum.Font.GothamBold
+Button.Parent = Frame
 
 local BtnCorner = Instance.new("UICorner")
-BtnCorner.CornerRadius = UDim.new(0, 8)
-BtnCorner.Parent = SubmitBtn
+BtnCorner.CornerRadius = UDim.new(0, 6)
+BtnCorner.Parent = Button
 
-local StatusLabel = Instance.new("TextLabel")
-StatusLabel.Size = UDim2.new(1, -40, 0, 25)
-StatusLabel.Position = UDim2.new(0, 20, 0, 165)
-StatusLabel.BackgroundTransparency = 1
-StatusLabel.Text = ""
-StatusLabel.TextSize = 12
-StatusLabel.Font = Enum.Font.GothamBold
-StatusLabel.Parent = KeyFrame
+local Status = Instance.new("TextLabel")
+Status.Size = UDim2.new(1, -30, 0, 20)
+Status.Position = UDim2.new(0, 15, 0, 140)
+Status.BackgroundTransparency = 1
+Status.TextColor3 = Color3.fromRGB(200, 200, 200)
+Status.TextSize = 11
+Status.Font = Enum.Font.Gotham
+Status.Text = ""
+Status.Parent = Frame
 
--- دالة تشغيل الهاك الأساسي بكامل مميزاته
 local function LaunchMainScript()
-    KeyScreenGui:Destroy()
+    ScreenGui:Destroy()
     
     local RunService = game:GetService("RunService")
-    local UserInputService = game:GetService("UserInputService")
     local Camera = workspace.CurrentCamera
-    local Mouse = LocalPlayer:GetMouse()
 
     local Settings = {
         Enabled = true,
         ShowFOV = true,
-        XRayEnabled = true,
-        LootRadarEnabled = true,
-        CircleMode = "Static",
         FOVRadius = 150,
-        LockSpeed = 0.8,
-        VerticalOffset = 0,
-        TargetPart = "Head",
-        SafeZoneName = "SafeZone"
     }
 
-    local LastCheckTime = 0
-    local CheckInterval = 0.2
-
-    local function IsInSafeZone(playerCharacter)
-        if not playerCharacter then return false end
-        if playerCharacter:FindFirstChildOfClass("ForceField") then return true end
-        local hrp = playerCharacter:FindFirstChild("HumanoidRootPart")
-        if not hrp then return false end
-        local safeZones = workspace:FindFirstChild(Settings.SafeZoneName) or workspace:FindFirstChild("SafeZones")
-        if safeZones then
-            for _, zone in ipairs(safeZones:GetChildren()) do
-                if zone:IsA("BasePart") then
-                    if (hrp.Position - zone.Position).Magnitude < (zone.Size.Magnitude / 2) then return true end
-                end
-            end
-        end
-        return false
-    end
-
-    local function IsVisible(targetPart)
-        local raycastParams = RaycastParams.new()
-        raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-        raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetPart.Parent}
-        raycastParams.IgnoreWater = true
-        local result = workspace:Raycast(Camera.CFrame.Position, targetPart.Position - Camera.CFrame.Position, raycastParams)
-        if result and result.Instance then
-            local hitParent = result.Instance.Parent
-            if hitParent:IsA("Model") and (hitParent:FindFirstChild("VehicleSeat") or hitParent:FindFirstChild("Seat")) then return true end
-            return false
-        end
-        return true
-    end
-
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "HermanosCustomGui"
-    ScreenGui.ResetOnSpawn = false
-    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    local MainGui = Instance.new("ScreenGui")
+    MainGui.Name = "HermanosCustomGui"
+    MainGui.ResetOnSpawn = false
+    MainGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
     local FOVCircle = Instance.new("Frame")
-    FOVCircle.Name = "FOVCircle"
     FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
     FOVCircle.BackgroundTransparency = 1
-    FOVCircle.Parent = ScreenGui
+    FOVCircle.Parent = MainGui
 
     local UIStroke = Instance.new("UIStroke")
     UIStroke.Color = Color3.fromRGB(0, 242, 254)
@@ -162,340 +117,35 @@ local function LaunchMainScript()
     UICornerCircle.CornerRadius = UDim.new(1, 0)
     UICornerCircle.Parent = FOVCircle
 
-    local MainFrame = Instance.new("ImageLabel")
-    MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 480, 0, 320)
-    MainFrame.Position = UDim2.new(0.5, -240, 0.5, -160)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-    MainFrame.Image = "rbxassetid://108865215286591" 
-    MainFrame.ImageTransparency = 0.1
-    MainFrame.ScaleType = Enum.ScaleType.Crop
-    MainFrame.BorderSizePixel = 0
-    MainFrame.Active = true
-    MainFrame.Draggable = true
-    MainFrame.Parent = ScreenGui
-
-    local MainCorner = Instance.new("UICorner")
-    MainCorner.CornerRadius = UDim.new(0, 12)
-    MainCorner.Parent = MainFrame
-
-    local MainStroke = Instance.new("UIStroke")
-    MainStroke.Color = Color3.fromRGB(0, 242, 254)
-    MainStroke.Thickness = 1.8
-    MainStroke.Transparency = 0.3
-    MainStroke.Parent = MainFrame
-
-    local TopBar = Instance.new("Frame")
-    TopBar.Size = UDim2.new(1, 0, 0, 40)
-    TopBar.BackgroundColor3 = Color3.fromRGB(8, 8, 12)
-    TopBar.BackgroundTransparency = 0.3
-    TopBar.BorderSizePixel = 0
-    TopBar.Parent = MainFrame
-
-    local TopCorner = Instance.new("UICorner")
-    TopCorner.CornerRadius = UDim.new(0, 12)
-    TopCorner.Parent = TopBar
-
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -20, 1, 0)
-    TitleLabel.Position = UDim2.new(0, 15, 0, 0)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = "⚡ Light Tower Assistant | [K] Hide"
-    TitleLabel.TextColor3 = Color3.fromRGB(240, 240, 250)
-    TitleLabel.TextSize = 13
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TitleLabel.Parent = TopBar
-
-    local ContentContainer = Instance.new("ScrollingFrame")
-    ContentContainer.Size = UDim2.new(1, -20, 1, -55)
-    ContentContainer.Position = UDim2.new(0, 10, 0, 48)
-    ContentContainer.BackgroundTransparency = 1
-    ContentContainer.BorderSizePixel = 0
-    ContentContainer.CanvasSize = UDim2.new(0, 0, 0, 380)
-    ContentContainer.ScrollBarThickness = 4
-    ContentContainer.ScrollBarImageColor3 = Color3.fromRGB(0, 242, 254)
-    ContentContainer.Parent = MainFrame
-
-    local UIListLayout = Instance.new("UIListLayout")
-    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    UIListLayout.Padding = UDim.new(0, 8)
-    UIListLayout.Parent = ContentContainer
-
-    local function CreateToggleOption(text, defaultState, callback)
-        local frame = Instance.new("Frame")
-        frame.Size = UDim2.new(1, 0, 0, 38)
-        frame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
-        frame.BackgroundTransparency = 0.5
-        frame.BorderSizePixel = 0
-        frame.Parent = ContentContainer
-
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 8)
-        corner.Parent = frame
-
-        local stroke = Instance.new("UIStroke")
-        stroke.Color = Color3.fromRGB(255, 255, 255)
-        stroke.Thickness = 1
-        stroke.Transparency = 0.8
-        stroke.Parent = frame
-
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(0.7, 0, 1, 0)
-        label.Position = UDim2.new(0, 15, 0, 0)
-        label.BackgroundTransparency = 1
-        label.Text = text
-        label.TextColor3 = Color3.fromRGB(230, 230, 240)
-        label.TextSize = 12
-        label.Font = Enum.Font.GothamBold
-        label.TextXAlignment = Enum.TextXAlignment.Left
-        label.Parent = frame
-
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0, 46, 0, 22)
-        btn.Position = UDim2.new(1, -56, 0.5, -11)
-        btn.BackgroundColor3 = defaultState and Color3.fromRGB(0, 230, 118) or Color3.fromRGB(50, 50, 65)
-        btn.BackgroundTransparency = 0.2
-        btn.Text = ""
-        btn.Parent = frame
-
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(1, 0)
-        btnCorner.Parent = btn
-
-        local state = defaultState
-        btn.MouseButton1Click:Connect(function()
-            state = not state
-            btn.BackgroundColor3 = state and Color3.fromRGB(0, 230, 118) or Color3.fromRGB(50, 50, 65)
-            callback(state)
-        end)
-        return frame
-    end
-
-    local function CreateButtonOption(text, buttonText, callback)
-        local frame = Instance.new("Frame")
-        frame.Size = UDim2.new(1, 0, 0, 38)
-        frame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
-        frame.BackgroundTransparency = 0.5
-        frame.BorderSizePixel = 0
-        frame.Parent = ContentContainer
-
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 8)
-        corner.Parent = frame
-
-        local stroke = Instance.new("UIStroke")
-        stroke.Color = Color3.fromRGB(255, 255, 255)
-        stroke.Thickness = 1
-        stroke.Transparency = 0.8
-        stroke.Parent = frame
-
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(0.45, 0, 1, 0)
-        label.Position = UDim2.new(0, 15, 0, 0)
-        label.BackgroundTransparency = 1
-        label.Text = text
-        label.TextColor3 = Color3.fromRGB(230, 230, 240)
-        label.TextSize = 12
-        label.Font = Enum.Font.GothamBold
-        label.TextXAlignment = Enum.TextXAlignment.Left
-        label.Parent = frame
-
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0, 135, 0, 26)
-        btn.Position = UDim2.new(1, -145, 0.5, -13)
-        btn.BackgroundColor3 = Color3.fromRGB(0, 242, 254)
-        btn.BackgroundTransparency = 0.7
-        btn.Text = buttonText
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        btn.TextSize = 11
-        btn.Font = Enum.Font.GothamMedium
-        btn.Parent = frame
-
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(0, 6)
-        btnCorner.Parent = btn
-
-        btn.MouseButton1Click:Connect(function()
-            local newText = callback()
-            if newText then btn.Text = newText end
-        end)
-        return frame
-    end
-
-    CreateToggleOption("Enable Aim Assistant", Settings.Enabled, function(state) Settings.Enabled = state end)
-    CreateToggleOption("Show FOV Circle", Settings.ShowFOV, function(state) Settings.ShowFOV = state end)
-    
-    CreateButtonOption("FOV Size", "150 (Medium)", function()
-        if Settings.FOVRadius == 100 then Settings.FOVRadius = 150 return "150 (Medium)"
-        elseif Settings.FOVRadius == 150 then Settings.FOVRadius = 220 return "220 (Large)"
-        else Settings.FOVRadius = 100 return "100 (Small)" end
-    end)
-
-    CreateButtonOption("Aim Mode", "Static Center", function()
-        if Settings.CircleMode == "Static" then Settings.CircleMode = "FollowMouse" return "Follow Mouse"
-        else Settings.CircleMode = "Static" return "Static Center" end
-    end)
-
-    CreateButtonOption("Aim Part / Offset", "Head (Center)", function()
-        if Settings.VerticalOffset == 0 then Settings.VerticalOffset = 1.5 Settings.TargetPart = "Head" return "Head (High)"
-        elseif Settings.VerticalOffset == 1.5 then Settings.VerticalOffset = -1.2 Settings.TargetPart = "Head" return "Chest (Low)"
-        else Settings.VerticalOffset = 0 Settings.TargetPart = "Head" return "Head (Center)" end
-    end)
-
-    CreateToggleOption("X-Ray ESP (Players)", Settings.XRayEnabled, function(state) Settings.XRayEnabled = state end)
-    CreateToggleOption("Loot Radar (Items)", Settings.LootRadarEnabled, function(state) Settings.LootRadarEnabled = state end)
-
-    local function UpdateXRay()
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character then
-                local highlight = player.Character:FindFirstChild("XRayHighlight")
-                if Settings.XRayEnabled and not IsInSafeZone(player.Character) then
-                    if not highlight then
-                        highlight = Instance.new("Highlight")
-                        highlight.Name = "XRayHighlight"
-                        highlight.FillColor = Color3.fromRGB(255, 50, 80)
-                        highlight.FillTransparency = 0.5
-                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                        highlight.Parent = player.Character
-                    end
-                else
-                    if highlight then highlight:Destroy() end
-                end
-            end
-        end
-    end
-
-    local function UpdatePlayerLootRadar()
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character then
-                for _, child in ipairs(player.Character:GetChildren()) do
-                    if child:IsA("Tool") and child:FindFirstChild("Handle") then
-                        local hl = child.Handle:FindFirstChild("LootHighlight")
-                        if Settings.LootRadarEnabled then
-                            if not hl then
-                                hl = Instance.new("Highlight")
-                                hl.Name = "LootHighlight"
-                                hl.FillColor = Color3.fromRGB(255, 215, 0)
-                                hl.FillTransparency = 0.3
-                                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                                hl.Parent = child.Handle
-                            end
-                        else
-                            if hl then hl:Destroy() end
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    local function GetCenterPoint()
-        if Settings.CircleMode == "Static" then
-            return Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-        else
-            return Vector2.new(Mouse.X, Mouse.Y)
-        end
-    end
-
-    local function GetClosestTarget()
-        local localChar = LocalPlayer.Character
-        if not localChar or not localChar:FindFirstChild("HumanoidRootPart") then return nil end
-        local closestTarget = nil
-        local shortestDistanceToScreen = Settings.FOVRadius
-        local centerPoint = GetCenterPoint()
-
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(Settings.TargetPart) then
-                local char = player.Character
-                local humanoid = char:FindFirstChildOfClass("Humanoid")
-                local targetPart = char[Settings.TargetPart]
-                if humanoid and humanoid.Health > 0 and not IsInSafeZone(char) and IsVisible(targetPart) then
-                    local screenPos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
-                    if onScreen then
-                        local dist = (Vector2.new(screenPos.X, screenPos.Y) - centerPoint).Magnitude
-                        if dist < shortestDistanceToScreen then
-                            shortestDistanceToScreen = dist
-                            closestTarget = targetPart
-                        end
-                    end
-                end
-            end
-        end
-        return closestTarget
-    end
-
-    RunService.RenderStepped:Connect(function(dt)
-        local centerPoint = GetCenterPoint()
+    RunService.RenderStepped:Connect(function()
         FOVCircle.Visible = Settings.ShowFOV and Settings.Enabled
         FOVCircle.Size = UDim2.new(0, Settings.FOVRadius * 2, 0, Settings.FOVRadius * 2)
-        FOVCircle.Position = UDim2.new(0, centerPoint.X, 0, centerPoint.Y)
-
-        LastCheckTime = LastCheckTime + dt
-        if LastCheckTime >= CheckInterval then
-            LastCheckTime = 0
-            UpdateXRay()
-            UpdatePlayerLootRadar()
-        end
-
-        if Settings.Enabled then
-            local target = GetClosestTarget()
-            if target then
-                local adjustedPos = target.Position + Vector3.new(0, Settings.VerticalOffset, 0)
-                Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, adjustedPos), Settings.LockSpeed)
-            end
-        end
-    end)
-
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if not gameProcessed and input.KeyCode == Enum.KeyCode.K then
-            MainFrame.Visible = not MainFrame.Visible
-        end
+        FOVCircle.Position = UDim2.new(0, Camera.ViewportSize.X / 2, 0, Camera.ViewportSize.Y / 2)
     end)
 end
 
--- زر التحقق الآمن بالخلفية بدون أي تعليق أو أخطاء
-SubmitBtn.MouseButton1Click:Connect(function()
-    local enteredKey = KeyBox.Text
-    if enteredKey == "" or enteredKey == "Paste your license key here..." then
-        StatusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
-        StatusLabel.Text = "❌ Please enter a key!"
+Button.MouseButton1Click:Connect(function()
+    local key = TextBox.Text
+    if key == "" then
+        Status.TextColor3 = Color3.fromRGB(255, 80, 80)
+        Status.Text = "Please enter a key!"
         return
     end
 
-    SubmitBtn.Text = "Checking..."
-    StatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    StatusLabel.Text = "⏳ Connecting to KeyAuth..."
-
+    Button.Text = "Checking..."
+    
     task.spawn(function()
-        local name = "Moath.9.20011"
-        local ownerid = "DTr7H3vPPD"
-        local secret = "13fa8791d585af2d87b846874449316e2eb151499ae1755cd74aecf746c4ee1b"
-        local version = "1.0"
-
-        local url = string.format("https://keyauth.win/api/1.2/?name=%s&ownerid=%s&secret=%s&type=license&key=%s&ver=%s", name, ownerid, secret, enteredKey, version)
+        local isValid = KeyAuth:validate(key)
         
-        local success, response = pcall(function()
-            return game:HttpGet(url)
-        end)
-        
-        if success and response then
-            if response:match('"success":true') or response:match('"success": "true"') then
-                StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
-                StatusLabel.Text = "✅ Key Valid! Loading Script..."
-                task.wait(1)
-                LaunchMainScript()
-            else
-                StatusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
-                StatusLabel.Text = "❌ Invalid Key or Expired!"
-                SubmitBtn.Text = "Verify Key"
-            end
+        if isValid then
+            Status.TextColor3 = Color3.fromRGB(0, 255, 128)
+            Status.Text = "Success! Loading..."
+            task.wait(0.5)
+            LaunchMainScript()
         else
-            StatusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
-            StatusLabel.Text = "❌ Connection Failed!"
-            SubmitBtn.Text = "Verify Key"
+            Status.TextColor3 = Color3.fromRGB(255, 80, 80)
+            Status.Text = "Invalid or Expired Key!"
+            Button.Text = "Verify Key"
         end
     end)
 end)
