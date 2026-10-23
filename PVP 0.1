@@ -495,3 +495,13 @@ SubmitBtn.MouseButton1Click:Connect(function()
         SubmitBtn.Text = "Verify Key"
     end
 end)
+local KeyAuthApp = loadstring(game:HttpGet("https://raw.githubusercontent.com/moath920011-web/PVP/refs/heads/main/auth.lua"))()
+
+local KeyAuth = KeyAuthApp.new({
+    name = "Moath.9.20011", -- اسم تطبيقك تماماً
+    ownerid = "DTr7H3vPPD", -- أيدي المالك اللي طلعناه
+    secret = "13fa8791d585af2d87b846874449316e2eb151499ae1755cd74aecf746c4ee1b", -- المفتاح السري الجديد اللي أرسلته توك
+    version = "1.0"
+})
+
+KeyAuth:init()
