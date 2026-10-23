@@ -1,13 +1,12 @@
 -- ============================================
--- 🔑 KeyAuth Secure Client Loader & UI
+-- 🔑 Light Tower Secure Loader & UI
 -- ============================================
 local KeyAuthApp = loadstring(game:HttpGet("https://raw.githubusercontent.com/moath920011-web/PVP/refs/heads/main/auth.lua"))()
 
--- 💡 ضع بيانات تطبيقك من لوحة تحكم KeyAuth هنا:
 local KeyAuth = KeyAuthApp.new({
-    name = "اسم_تطبيقك",         -- ضع اسم تطبيقك تماماً
-    ownerid = "آيدي_المالك",       -- الـ Owner ID
-    secret = "الرمز_السرّي",       -- الـ Secret Key
+    name = "Moath.9.20011",
+    ownerid = "DTr7H3vPPD",
+    secret = "13fa8791d585af2d87b846874449316e2eb151499ae1755cd74aecf746c4ee1b",
     version = "1.0"
 })
 
@@ -16,7 +15,6 @@ KeyAuth:init()
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- تنظيف أي واجهة قديمة
 if LocalPlayer.PlayerGui:FindFirstChild("KeySystemGui") then
     LocalPlayer.PlayerGui.KeySystemGui:Destroy()
 end
@@ -24,7 +22,6 @@ if LocalPlayer.PlayerGui:FindFirstChild("HermanosCustomGui") then
     LocalPlayer.PlayerGui.HermanosCustomGui:Destroy()
 end
 
--- إنشاء واجهة إدخال الكي للزبون
 local KeyScreenGui = Instance.new("ScreenGui")
 KeyScreenGui.Name = "KeySystemGui"
 KeyScreenGui.ResetOnSpawn = false
@@ -58,7 +55,6 @@ TitleKey.TextSize = 14
 TitleKey.Font = Enum.Font.GothamBold
 TitleKey.Parent = KeyFrame
 
--- خانة كتابة الكي
 local KeyBox = Instance.new("TextBox")
 KeyBox.Size = UDim2.new(1, -40, 0, 40)
 KeyBox.Position = UDim2.new(0, 20, 0, 60)
@@ -75,7 +71,6 @@ local BoxCorner = Instance.new("UICorner")
 BoxCorner.CornerRadius = UDim.new(0, 8)
 BoxCorner.Parent = KeyBox
 
--- زر التحقق
 local SubmitBtn = Instance.new("TextButton")
 SubmitBtn.Size = UDim2.new(1, -40, 0, 38)
 SubmitBtn.Position = UDim2.new(0, 20, 0, 115)
@@ -91,7 +86,6 @@ local BtnCorner = Instance.new("UICorner")
 BtnCorner.CornerRadius = UDim.new(0, 8)
 BtnCorner.Parent = SubmitBtn
 
--- رسالة الحالة
 local StatusLabel = Instance.new("TextLabel")
 StatusLabel.Size = UDim2.new(1, -40, 0, 25)
 StatusLabel.Position = UDim2.new(0, 20, 0, 165)
@@ -101,7 +95,6 @@ StatusLabel.TextSize = 12
 StatusLabel.Font = Enum.Font.GothamBold
 StatusLabel.Parent = KeyFrame
 
--- دالة تشغيل السكريبت الأساسي بعد نجاح التحقق
 local function LoadMainScript()
     KeyScreenGui:Destroy()
     
@@ -470,7 +463,6 @@ local function LoadMainScript()
     end)
 end
 
--- التحقق من الكي
 SubmitBtn.MouseButton1Click:Connect(function()
     local enteredKey = KeyBox.Text
     if enteredKey == "" or enteredKey == "Paste your license key here..." then
@@ -495,13 +487,3 @@ SubmitBtn.MouseButton1Click:Connect(function()
         SubmitBtn.Text = "Verify Key"
     end
 end)
-local KeyAuthApp = loadstring(game:HttpGet("https://raw.githubusercontent.com/moath920011-web/PVP/refs/heads/main/auth.lua"))()
-
-local KeyAuth = KeyAuthApp.new({
-    name = "Moath.9.20011", -- اسم تطبيقك تماماً
-    ownerid = "DTr7H3vPPD", -- أيدي المالك اللي طلعناه
-    secret = "13fa8791d585af2d87b846874449316e2eb151499ae1755cd74aecf746c4ee1b", -- المفتاح السري الجديد اللي أرسلته توك
-    version = "1.0"
-})
-
-KeyAuth:init()
