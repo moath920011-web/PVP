@@ -11,27 +11,21 @@ function KeyAuth.new(data)
 end
 
 function KeyAuth:init()
-    -- تهيئة الاتصال بـ KeyAuth
     local url = string.format("https://keyauth.win/api/1.2/?name=%s&ownerid=%s&type=init&ver=%s", self.name, self.ownerid, self.version)
-    local success, response = pcall(function()
-        return game:HttpGet(url)
+    pcall(function()
+        game:HttpGet(url)
     end)
-    if success and response then
-        if string.find(response, '"success":true') then
-            -- تم الاتصال بنجاح
-        end
-    end
 end
 
 function KeyAuth:license(key)
-    -- التحقق من المفتاح المدخل من الزبون
     local url = string.format("https://keyauth.win/api/1.2/?name=%s&ownerid=%s&secret=%s&type=license&key=%s&ver=%s", self.name, self.ownerid, self.secret, key, self.version)
     local success, response = pcall(function()
         return game:HttpGet(url)
     end)
     
     if success and response then
-        if string.find(response, '"success":true') then
+        -- التحقق المرن من رد سيرفر KeyAuth
+        if response:match('"success":true') or response:match('"success": "true"') then
             self.authenticated = true
         else
             self.authenticated = false
