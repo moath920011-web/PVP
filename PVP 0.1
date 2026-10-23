@@ -1,26 +1,10 @@
 -- ============================================
--- ⚡ Light Tower Loader & Key System
+-- ⚡ Light Tower Clean Loader (Non-Freezing)
 -- ============================================
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-local successLoad, KeyAuthModule = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/moath920011-web/PVP/refs/heads/main/auth.lua"))()
-end)
-
-if not successLoad or not KeyAuthModule then
-    warn("Failed to load auth.lua")
-    return
-end
-
--- البيانات الجديدة المطلوبة
-local KeyAuth = KeyAuthModule.new({
-    name = "Moath.9.20011",
-    ownerid = "DTr7H3vPPD",
-    secret = "959fb413bbb5086fb63ad24d9474e0e300da6db87fedc93084b9610ed44b250b",
-    version = "1.0"
-})
-
+-- تنظيف أي واجهات قديمة لمنع التكرار
 if LocalPlayer.PlayerGui:FindFirstChild("KeySystemGui") then
     LocalPlayer.PlayerGui.KeySystemGui:Destroy()
 end
@@ -28,6 +12,7 @@ if LocalPlayer.PlayerGui:FindFirstChild("HermanosCustomGui") then
     LocalPlayer.PlayerGui.HermanosCustomGui:Destroy()
 end
 
+-- واجهة إدخال الكي
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "KeySystemGui"
 ScreenGui.ResetOnSpawn = false
@@ -86,6 +71,7 @@ Status.Font = Enum.Font.Gotham
 Status.Text = ""
 Status.Parent = Frame
 
+-- دالة تشغيل الهاك بعد نجاح الكي
 local function LaunchMainScript()
     ScreenGui:Destroy()
     
@@ -124,6 +110,7 @@ local function LaunchMainScript()
     end)
 end
 
+-- زر التحقق بالخلفية لضمان عدم تعليق الشاشة
 Button.MouseButton1Click:Connect(function()
     local key = TextBox.Text
     if key == "" then
@@ -133,18 +120,35 @@ Button.MouseButton1Click:Connect(function()
     end
 
     Button.Text = "Checking..."
-    
+    Status.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Status.Text = "Connecting..."
+
     task.spawn(function()
-        local isValid = KeyAuth:validate(key)
+        local name = "Moath.9.20011"
+        local ownerid = "DTr7H3vPPD"
+        local secret = "959fb413bbb5086fb63ad24d9474e0e300da6db87fedc93084b9610ed44b250b"
+        local version = "1.0"
+
+        local url = string.format("https://keyauth.win/api/1.2/?name=%s&ownerid=%s&secret=%s&type=license&key=%s&ver=%s", name, ownerid, secret, key, version)
         
-        if isValid then
-            Status.TextColor3 = Color3.fromRGB(0, 255, 128)
-            Status.Text = "Success! Loading..."
-            task.wait(0.5)
-            LaunchMainScript()
+        local success, response = pcall(function()
+            return game:HttpGet(url)
+        end)
+
+        if success and response then
+            if response:match('"success":true') or response:match('"success": "true"') then
+                Status.TextColor3 = Color3.fromRGB(0, 255, 128)
+                Status.Text = "Success! Loading..."
+                task.wait(0.5)
+                LaunchMainScript()
+            else
+                Status.TextColor3 = Color3.fromRGB(255, 80, 80)
+                Status.Text = "Invalid or Expired Key!"
+                Button.Text = "Verify Key"
+            end
         else
-            Status.TextColor3 = Color3.fromRGB(255, 80, 80)
-            Status.Text = "Invalid or Expired Key!"
+            Status.TextColor3 = Color3.fromRGB(255, 50, 50)
+            Status.Text = "Connection Error!"
             Button.Text = "Verify Key"
         end
     end)
