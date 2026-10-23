@@ -1,6 +1,7 @@
 -- ============================================
--- 🔑 Light Tower Secure Loader & UI
+-- 🔑 Light Tower Ultimate Loader & Main Script
 -- ============================================
+
 local KeyAuthApp = loadstring(game:HttpGet("https://raw.githubusercontent.com/moath920011-web/PVP/refs/heads/main/auth.lua"))()
 
 local KeyAuth = KeyAuthApp.new({
@@ -15,6 +16,7 @@ KeyAuth:init()
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
+-- تنظيف أي واجهات قديمة
 if LocalPlayer.PlayerGui:FindFirstChild("KeySystemGui") then
     LocalPlayer.PlayerGui.KeySystemGui:Destroy()
 end
@@ -22,6 +24,7 @@ if LocalPlayer.PlayerGui:FindFirstChild("HermanosCustomGui") then
     LocalPlayer.PlayerGui.HermanosCustomGui:Destroy()
 end
 
+-- واجهة إدخال الكي
 local KeyScreenGui = Instance.new("ScreenGui")
 KeyScreenGui.Name = "KeySystemGui"
 KeyScreenGui.ResetOnSpawn = false
@@ -95,7 +98,8 @@ StatusLabel.TextSize = 12
 StatusLabel.Font = Enum.Font.GothamBold
 StatusLabel.Parent = KeyFrame
 
-local function LoadMainScript()
+-- دالة تشغيل الهاك بالكامل مباشرة بعد نجاح التحقق
+local function LaunchMainScript()
     KeyScreenGui:Destroy()
     
     local RunService = game:GetService("RunService")
@@ -463,6 +467,7 @@ local function LoadMainScript()
     end)
 end
 
+-- زر التحقق وتشغيل كل شيء
 SubmitBtn.MouseButton1Click:Connect(function()
     local enteredKey = KeyBox.Text
     if enteredKey == "" or enteredKey == "Paste your license key here..." then
@@ -480,7 +485,7 @@ SubmitBtn.MouseButton1Click:Connect(function()
         StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
         StatusLabel.Text = "✅ Key Valid! Loading Script..."
         task.wait(1)
-        LoadMainScript()
+        LaunchMainScript()
     else
         StatusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
         StatusLabel.Text = "❌ Invalid Key or Expired!"
