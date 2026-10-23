@@ -1,0 +1,438 @@
+-- ============================================
+-- 🎯 Light Tower Aim & ESP Assistant | v0.1
+-- ============================================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local Mouse = LocalPlayer:GetMouse()
+
+local Settings = {
+    Enabled = true,
+    ShowFOV = true,
+    XRayEnabled = true,
+    LootRadarEnabled = true,
+    CircleMode = "Static",
+    FOVRadius = 150,
+    LockSpeed = 0.8,
+    VerticalOffset = 0,
+    TargetPart = "Head",
+    SafeZoneName = "SafeZone"
+}
+
+local LastCheckTime = 0
+local CheckInterval = 0.2
+
+local function IsInSafeZone(playerCharacter)
+    if not playerCharacter then return false end
+    if playerCharacter:FindFirstChildOfClass("ForceField") then return true end
+    
+    local hrp = playerCharacter:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+
+    local safeZones = workspace:FindFirstChild(Settings.SafeZoneName) or workspace:FindFirstChild("SafeZones")
+    if safeZones then
+        for _, zone in ipairs(safeZones:GetChildren()) do
+            if zone:IsA("BasePart") then
+                local distance = (hrp.Position - zone.Position).Magnitude
+                if distance < (zone.Size.Magnitude / 2) then return true end
+            end
+        end
+    end
+    return false
+end
+
+local function IsVisible(targetPart)
+    local cameraPos = Camera.CFrame.Position
+    local targetPos = targetPart.Position
+
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetPart.Parent}
+    raycastParams.IgnoreWater = true
+
+    local result = workspace:Raycast(cameraPos, targetPos - cameraPos, raycastParams)
+    
+    if result and result.Instance then
+        local hitParent = result.Instance.Parent
+        if hitParent:IsA("Model") and (hitParent:FindFirstChild("VehicleSeat") or hitParent:FindFirstChild("Seat")) then
+            return true
+        end
+        return false
+    end
+    return true
+end
+
+-- تنظيف الواجهة القديمة
+local existingGui = LocalPlayer.PlayerGui:FindFirstChild("HermanosCustomGui")
+if existingGui then
+    existingGui:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "HermanosCustomGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- دائرة الـ FOV
+local FOVCircle = Instance.new("Frame")
+FOVCircle.Name = "FOVCircle"
+FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+FOVCircle.BackgroundTransparency = 1
+FOVCircle.Parent = ScreenGui
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(0, 230, 255)
+UIStroke.Thickness = 2
+UIStroke.Parent = FOVCircle
+
+local UICornerCircle = Instance.new("UICorner")
+UICornerCircle.CornerRadius = UDim.new(1, 0)
+UICornerCircle.Parent = FOVCircle
+
+-- الإطار الرئيسي (الخلفية الصورة التي أرسلتها)
+local MainFrame = Instance.new("ImageLabel")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 480, 0, 310)
+MainFrame.Position = UDim2.new(0.5, -240, 0.5, -155)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+-- 💡 ضع رقم الآست ID الخاص بصورتك بعد رفعها في روبلوكس مكان الأرقام أدناه:
+MainFrame.Image = "rbxassetid://108865215286591" 
+MainFrame.ImageTransparency = 0.05 -- وضوح كامل للصورة في الخلفية
+MainFrame.ScaleType = Enum.ScaleType.Crop
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(150, 150, 160)
+MainStroke.Thickness = 1.5
+MainStroke.Transparency = 0.1
+MainStroke.Parent = MainFrame
+
+-- شريط العنوان العلوي (v0.1)
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, 0, 0, 35)
+TopBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TopBar.BackgroundTransparency = 0.6
+TopBar.BorderSizePixel = 0
+TopBar.Parent = MainFrame
+
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0, 10)
+TopCorner.Parent = TopBar
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, -20, 1, 0)
+TitleLabel.Position = UDim2.new(0, 12, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "v0.1 | Press K to Hide/Show"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 13
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Parent = TopBar
+
+-- إطار المحتوى الشفاف بالكامل لتظهر صورتك بوضوح خلف الخيارات
+local ContentContainer = Instance.new("ScrollingFrame")
+ContentContainer.Size = UDim2.new(1, -20, 1, -50)
+ContentContainer.Position = UDim2.new(0, 10, 0, 42)
+ContentContainer.BackgroundTransparency = 1
+ContentContainer.BorderSizePixel = 0
+ContentContainer.CanvasSize = UDim2.new(0, 0, 0, 350)
+ContentContainer.ScrollBarThickness = 3
+ContentContainer.Parent = MainFrame
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.Parent = ContentContainer
+
+local function CreateToggleOption(text, defaultState, callback)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 0, 35)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    frame.BackgroundTransparency = 0.75 -- شفافية عالية لتظهر صورتك بوضوح تام من الخلف
+    frame.BorderSizePixel = 0
+    frame.Parent = ContentContainer
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = frame
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 255, 255)
+    stroke.Thickness = 1
+    stroke.Transparency = 0.6
+    stroke.Parent = frame
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.7, 0, 1, 0)
+    label.Position = UDim2.new(0, 12, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 12
+    label.Font = Enum.Font.GothamBold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = frame
+
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 42, 0, 20)
+    btn.Position = UDim2.new(1, -52, 0.5, -10)
+    btn.BackgroundColor3 = defaultState and Color3.fromRGB(46, 204, 113) or Color3.fromRGB(50, 50, 60)
+    btn.BackgroundTransparency = 0.3
+    btn.Text = ""
+    btn.Parent = frame
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(1, 0)
+    btnCorner.Parent = btn
+
+    local state = defaultState
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        btn.BackgroundColor3 = state and Color3.fromRGB(46, 204, 113) or Color3.fromRGB(50, 50, 60)
+        callback(state)
+    end)
+    return frame
+end
+
+local function CreateButtonOption(text, buttonText, callback)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 0, 35)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    frame.BackgroundTransparency = 0.75 -- شفافية عالية لتظهر صورتك بوضوح تام من الخلف
+    frame.BorderSizePixel = 0
+    frame.Parent = ContentContainer
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = frame
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 255, 255)
+    stroke.Thickness = 1
+    stroke.Transparency = 0.6
+    stroke.Parent = frame
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.5, 0, 1, 0)
+    label.Position = UDim2.new(0, 12, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 12
+    label.Font = Enum.Font.GothamBold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = frame
+
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 130, 0, 24)
+    btn.Position = UDim2.new(1, -140, 0.5, -12)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    btn.BackgroundTransparency = 0.4
+    btn.Text = buttonText
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 11
+    btn.Font = Enum.Font.GothamMedium
+    btn.Parent = frame
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 4)
+    btnCorner.Parent = btn
+
+    btn.MouseButton1Click:Connect(function()
+        local newText = callback()
+        if newText then btn.Text = newText end
+    end)
+    return frame
+end
+
+-- إضافة الخيارات
+CreateToggleOption("Enable Aim Assistant", Settings.Enabled, function(state)
+    Settings.Enabled = state
+end)
+
+CreateToggleOption("Show FOV Circle", Settings.ShowFOV, function(state)
+    Settings.ShowFOV = state
+end)
+
+CreateButtonOption("FOV Size", "150 (Medium)", function()
+    if Settings.FOVRadius == 100 then
+        Settings.FOVRadius = 150
+        return "150 (Medium)"
+    elseif Settings.FOVRadius == 150 then
+        Settings.FOVRadius = 220
+        return "220 (Large)"
+    else
+        Settings.FOVRadius = 100
+        return "100 (Small)"
+    end
+end)
+
+CreateButtonOption("Aim Mode", "Static Center", function()
+    if Settings.CircleMode == "Static" then
+        Settings.CircleMode = "FollowMouse"
+        return "Follow Mouse"
+    else
+        Settings.CircleMode = "Static"
+        return "Static Center"
+    end
+end)
+
+CreateButtonOption("Aim Part / Offset", "Head (Center)", function()
+    if Settings.VerticalOffset == 0 then
+        Settings.VerticalOffset = 1.5
+        Settings.TargetPart = "Head"
+        return "Head (High)"
+    elseif Settings.VerticalOffset == 1.5 then
+        Settings.VerticalOffset = -1.2
+        Settings.TargetPart = "Head"
+        return "Chest (Low)"
+    else
+        Settings.VerticalOffset = 0
+        Settings.TargetPart = "Head"
+        return "Head (Center)"
+    end
+end)
+
+CreateToggleOption("X-Ray ESP (Players)", Settings.XRayEnabled, function(state)
+    Settings.XRayEnabled = state
+end)
+
+CreateToggleOption("Loot Radar (Items)", Settings.LootRadarEnabled, function(state)
+    Settings.LootRadarEnabled = state
+end)
+
+-- وظائف المتابعة والكشف
+local function UpdateXRay()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local char = player.Character
+            local highlight = char:FindFirstChild("XRayHighlight")
+
+            if Settings.XRayEnabled and not IsInSafeZone(char) then
+                if not highlight then
+                    highlight = Instance.new("Highlight")
+                    highlight.Name = "XRayHighlight"
+                    highlight.FillColor = Color3.fromRGB(255, 0, 50)
+                    highlight.FillTransparency = 0.5
+                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    highlight.OutlineTransparency = 0
+                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                    highlight.Parent = char
+                end
+            else
+                if highlight then highlight:Destroy() end
+            end
+        end
+    end
+end
+
+local function UpdatePlayerLootRadar()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local char = player.Character
+            for _, child in ipairs(char:GetChildren()) do
+                if child:IsA("Tool") and child:FindFirstChild("Handle") then
+                    local handle = child.Handle
+                    local hl = handle:FindFirstChild("LootHighlight")
+                    
+                    if Settings.LootRadarEnabled then
+                        if not hl then
+                            hl = Instance.new("Highlight")
+                            hl.Name = "LootHighlight"
+                            hl.FillColor = Color3.fromRGB(255, 215, 0)
+                            hl.FillTransparency = 0.3
+                            hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            hl.OutlineTransparency = 0
+                            hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                            hl.Parent = handle
+                        end
+                    else
+                        if hl then hl:Destroy() end
+                    end
+                end
+            end
+        end
+    end
+end
+
+local function GetCenterPoint()
+    if Settings.CircleMode == "Static" then
+        return Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+    else
+        return Vector2.new(Mouse.X, Mouse.Y)
+    end
+end
+
+local function GetClosestTarget()
+    local localChar = LocalPlayer.Character
+    if not localChar or not localChar:FindFirstChild("HumanoidRootPart") then return nil end
+
+    local closestTarget = nil
+    local shortestDistanceToScreen = Settings.FOVRadius
+    local centerPoint = GetCenterPoint()
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(Settings.TargetPart) then
+            local char = player.Character
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            local targetPart = char[Settings.TargetPart]
+
+            if humanoid and humanoid.Health > 0 and not IsInSafeZone(char) and IsVisible(targetPart) then
+                local screenPos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
+
+                if onScreen then
+                    local distanceToCenter = (Vector2.new(screenPos.X, screenPos.Y) - centerPoint).Magnitude
+
+                    if distanceToCenter < shortestDistanceToScreen then
+                        shortestDistanceToScreen = distanceToCenter
+                        closestTarget = targetPart
+                    end
+                end
+            end
+        end
+    end
+
+    return closestTarget
+end
+
+RunService.RenderStepped:Connect(function(dt)
+    local centerPoint = GetCenterPoint()
+
+    FOVCircle.Visible = Settings.ShowFOV and Settings.Enabled
+    FOVCircle.Size = UDim2.new(0, Settings.FOVRadius * 2, 0, Settings.FOVRadius * 2)
+    FOVCircle.Position = UDim2.new(0, centerPoint.X, 0, centerPoint.Y)
+
+    LastCheckTime = LastCheckTime + dt
+    if LastCheckTime >= CheckInterval then
+        LastCheckTime = 0
+        UpdateXRay()
+        UpdatePlayerLootRadar()
+    end
+
+    if Settings.Enabled then
+        local target = GetClosestTarget()
+        if target then
+            local adjustedPosition = target.Position + Vector3.new(0, Settings.VerticalOffset, 0)
+            local targetCFrame = CFrame.new(Camera.CFrame.Position, adjustedPosition)
+            Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, Settings.LockSpeed)
+        end
+    end
+end)
+
+-- إخفاء/إظهار الواجهة بضغط زر K
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.K then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
